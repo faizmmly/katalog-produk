@@ -1,43 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-interface UseFetchResult<T> {
+interface FetchState<T> {
   data: T | null;
   loading: boolean;
   error: string | null;
-  refetch: () => void;
 }
 
-export function useFetch<T>(fetchFunction: () => Promise<T>, dependencies: any[] = []): UseFetchResult<T> {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [trigger, setTrigger] = useState<number>(0);
-
-  const refetch = () => setTrigger(prev => prev + 1);
+export function useFetch<T>(fetcher: (signal: AbortSignal) => Promise<T>) {
+  const [state, setState] = useState<FetchState<T>>({ data: null, loading: true, error: null });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    setError(null);
+    const controller = new AbortController();
+    setState((s) => ({ ...s, loading: true, error: null }));
 
-    fetchFunction()
-      .then(result => {
-        if (isMounted) {
-          setData(result);
-          setLoading(false);
-        }
-      })
-      .catch(err => {
-        if (isMounted) {
-          setError(err.message || 'Terjadi kesalahan saat memuat data.');
-          setLoading(false);
-        }
+    fetcher(controller.signal)
+      .then((data) => setState({ data, loading: false, error: null }))
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) return; // dibatalkan, abaikan
+        const message = err instanceof Error ? err.message : "Terjadi kesalahan.";
+        setState({ data: null, loading: false, error: message });
       });
 
-    return () => {
-      isMounted = false;
-    };
-  }, [...dependencies, trigger]);
+    return () => controller.abort();
+  }, [fetcher, attempt]);
 
-  return { data, loading, error, refetch };
+  const refetch = useCallback(() => setAttempt((a) => a + 1), []);
+  return { ...state, refetch };
 }
