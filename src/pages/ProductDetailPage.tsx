@@ -4,6 +4,8 @@ import { useFetch } from "../hooks/useFetch";
 import { fetchProduct } from "../services/productService";
 import { ErrorMessage, LoadingSpinner } from "../components/UIStates";
 import { formatCategory, formatPrice } from "../utils/format";
+import { FavoriteButton } from "../components/FavoriteButton";
+import { ReviewSection } from "../components/ReviewSection";
 
 export function ProductDetailPage() {
   const { id = "" } = useParams();
@@ -55,6 +57,7 @@ export function ProductDetailPage() {
             {product.brand && ` • ${product.brand}`}
           </p>
           <h1>{product.title}</h1>
+          <FavoriteButton productId={product.id} title={product.title} className="fav-inline" />
           <p className="rating">★ {product.rating.toFixed(1)}</p>
           <p className="detail-price">{formatPrice(product.price)}</p>
           <p className={`stock ${product.stock <= 0 ? "is-out" : product.stock <= 10 ? "is-low" : ""}`}>
@@ -64,7 +67,7 @@ export function ProductDetailPage() {
         </div>
       </div>
 
-      <section className="reviews">
+        <ReviewSection key={product.id} productId={String(product.id)} apiReviews={product.reviews} />
         <h2>Ulasan ({product.reviews.length})</h2>
         {product.reviews.length === 0 ? (
           <p className="muted">Belum ada ulasan.</p>
@@ -78,7 +81,6 @@ export function ProductDetailPage() {
             ))}
           </ul>
         )}
-      </section>
     </article>
   );
 }

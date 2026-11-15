@@ -131,6 +131,65 @@ code { font-family: ui-monospace, Consolas, monospace; background: #f1f5f9; padd
 .reviews ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
 .reviews li { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
 
+/* ===== Form ulasan ===== */
+.review-form { display: grid; gap: 14px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px; margin: 14px 0 20px; max-width: 560px; }
+.field { display: grid; gap: 6px; }
+.field label, .field .label { font-size: .85rem; font-weight: 600; color: var(--primary-dark); }
+.field input, .field textarea { font: inherit; width: 100%; padding: 10px 12px; border: 1.5px solid var(--line);
+  border-radius: 10px; background: var(--panel); color: var(--text); }
+.field textarea { resize: vertical; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, .12); }
+.field [aria-invalid="true"] { border-color: var(--danger); }
+.field-foot { display: flex; justify-content: space-between; gap: 8px; }
+.counter { font-size: .8rem; }
+.error { color: var(--danger); font-size: .82rem; }
+.success { color: var(--success); font-weight: 600; font-size: .9rem; }
+.stars { display: flex; gap: 4px; }
+.stars button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #f1f5f9; color: #cbd5e1;
+  font-size: 1.4rem; cursor: pointer; }
+.stars button.is-on { color: var(--star); background: #fffbeb; }
+.review-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-bottom: 4px; font-size: .9rem; }
+.reviews li.is-mine { border-color: var(--primary); }
+.link-danger { margin-left: auto; border: 0; background: none; color: var(--danger); font: inherit;
+  font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
+
+/* ===== Kartu, favorit, header ===== */
+.product-card { position: relative; }
+.product-link { display: flex; flex-direction: column; gap: 4px; color: inherit; text-decoration: none; }
+.fav-btn { width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .95);
+  color: #94a3b8; font-size: 1.3rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(15, 23, 42, .15); }
+.fav-btn.is-active { color: #e11d48; }
+.fav-btn:hover { transform: scale(1.08); }
+.fav-on-card { position: absolute; top: 16px; right: 16px; }
+.fav-inline { width: 44px; height: 44px; border: 1.5px solid var(--line); box-shadow: none; }
+
+.count { display: inline-block; min-width: 20px; margin-left: 6px; padding: 0 6px; border-radius: 999px;
+  background: #e11d48; color: #fff; font-size: .72rem; line-height: 20px; text-align: center; }
+.theme-btn { width: 44px; height: 44px; border: 0; border-radius: 10px; background: var(--primary-soft);
+  font-size: 1.1rem; cursor: pointer; }
+.center { text-align: center; }
+
+/* ===== Tema gelap ===== */
+:root[data-theme="dark"] {
+  --bg: #0b1220; --panel: #111b2e; --text: #e6edf7; --muted: #93a4bf; --line: #22314d;
+  --primary: #3b82f6; --primary-dark: #93c5fd; --primary-soft: #1e293b;
+  --shadow: 0 4px 14px rgba(0, 0, 0, .4);
+  color-scheme: dark;
+}
+:root[data-theme="dark"] .nav-link { color: #cbd5e1; }
+:root[data-theme="dark"] .nav-link:hover { background: #1e293b; }
+:root[data-theme="dark"] .chip { color: #cbd5e1; }
+:root[data-theme="dark"] .btn-ghost { background: #1e293b; color: #e6edf7; }
+:root[data-theme="dark"] .product-thumb,
+:root[data-theme="dark"] .detail-image,
+:root[data-theme="dark"] .thumbs button { background: #0b1220; }
+:root[data-theme="dark"] .fav-btn { background: rgba(15, 23, 42, .9); }
+:root[data-theme="dark"] .stars button { background: #1e293b; color: #475569; }
+:root[data-theme="dark"] .stars button.is-on { background: #422006; color: var(--star); }
+:root[data-theme="dark"] .skeleton { background: linear-gradient(90deg, #1e293b 25%, #111b2e 50%, #1e293b 75%); background-size: 200% 100%; }
+:root[data-theme="dark"] code { background: #1e293b; }
+
 @media (min-width: 800px) {
   .detail-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -144,4 +203,6 @@ code { font-family: ui-monospace, Consolas, monospace; background: #f1f5f9; padd
   .nav { display: none; flex-direction: column; width: 100%; margin: 0; }
   .nav.is-open { display: flex; }
   .nav-link { border-radius: 10px; }
+  .theme-btn { margin-left: auto; }
+  .menu-btn { margin-left: 0; }
 }
