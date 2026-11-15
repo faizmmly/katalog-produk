@@ -1,50 +1,25 @@
-import type { Product, ProductsResponse } from '../types/product';
+import type { Product, ProductDetail, ProductsResponse } from "../types/product";
 
-const BASE_URL = 'https://dummyjson.com/products';
+const BASE_URL = "https://dummyjson.com";
+const LIST_FIELDS =
+  "id,title,description,price,discountPercentage,rating,stock,brand,category,thumbnail";
 
-// Mengambil semua produk dengan opsi pencarian, pagination, dan sorting
-export async function fetchProducts(searchQuery = '', limit = 10, skip = 0, sortBy = '', order = 'asc'): Promise<ProductsResponse> {
-  let url = `${BASE_URL}`;
-  
-  if (searchQuery) {
-    url = `${BASE_URL}/search?q=${encodeURIComponent(searchQuery)}&limit=${limit}&skip=${skip}`;
-  } else {
-    url = `${BASE_URL}?limit=${limit}&skip=${skip}`;
+// Satu-satunya tempat yang memanggil API
+async function request<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, { signal });
+  if (!res.ok) {
+    throw new Error(
+      res.status === 404 ? "Data tidak ditemukan." : `Gagal memuat data (kode ${res.status}).`,
+    );
   }
-
-  if (sortBy) {
-    url += `&sortBy=${sortBy}&order=${order}`;
-  }
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Gagal memuat data produk dari server.');
-  }
-  return response.json();
+  return (await res.json()) as T;
 }
 
-export async function fetchCategories(): Promise<string[]> {
-  const response = await fetch(`${BASE_URL}/categories`);
-  if (!response.ok) {
-    throw new Error('Gagal memuat kategori.');
-  }
-  return response.json();
+export async function fetchAllProducts(signal?: AbortSignal): Promise<Product[]> {
+  const data = await request<ProductsResponse>(`/products?limit=0&select=${LIST_FIELDS}`, signal);
+  return data.products;
 }
 
-// Mengambil produk berdasarkan kategori
-export async function fetchProductsByCategory(category: string): Promise<ProductsResponse> {
-  const response = await fetch(`${BASE_URL}/category/${category}`);
-  if (!response.ok) {
-    throw new Error('Gagal memuat produk berdasarkan kategori.');
-  }
-  return response.json();
-}
-
-// Mengambil detail produk berdasarkan ID
-export async function fetchProductById(id: string | number): Promise<Product> {
-  const response = await fetch(`${BASE_URL}/${id}`);
-  if (!response.ok) {
-    throw new Error('Produk tidak ditemukan.');
-  }
-  return response.json();
+export function fetchProduct(id: string, signal?: AbortSignal): Promise<ProductDetail> {
+  return request<ProductDetail>(`/products/${id}`, signal);
 }
