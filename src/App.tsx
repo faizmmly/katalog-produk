@@ -1,9 +1,16 @@
-function App() {
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ProductsPage } from './Pages/ProductPage';
+import { ProductDetailPage } from './Pages/ProductDetailPage';
+
+export function App() {
   return (
-    <main>
-      <h1>Katalog Produk</h1>
-      <p>Faiz Muhammad Ilham • 1247050032 • IF A 24</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<ProductsPage />} />
+        <Route path="/produk/:id" element={<ProductDetailPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
