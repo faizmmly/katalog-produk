@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../services/productService';
-import type { Product } from '../types/product';
+import type { Category, Product } from '../types/product';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner, ErrorMessage, EmptyState } from '../components/UIStates';
 
@@ -15,7 +15,7 @@ export function ProductsPage() {
   const skip = (page - 1) * limit;
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]); // 👈 Perhatikan tipe data Category[]
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,6 @@ export function ProductsPage() {
     setError(null);
     fetchProducts(searchQuery, limit, skip, sortBy)
       .then(res => {
-        // Filter kategori client-side jika kategori dipilih di DummyJSON
         let filtered = res.products;
         if (selectedCategory) {
           filtered = filtered.filter(p => p.category === selectedCategory);
@@ -57,10 +56,10 @@ export function ProductsPage() {
     setSearchParams(newParams);
   };
 
-  const handleCategoryClick = (cat: string) => {
+  const handleCategoryClick = (slug: string) => {
     const newParams = new URLSearchParams(searchParams);
-    if (cat === selectedCategory) newParams.delete('category');
-    else newParams.set('category', cat);
+    if (slug === selectedCategory) newParams.delete('category');
+    else newParams.set('category', slug);
     newParams.set('page', '1');
     setSearchParams(newParams);
   };
@@ -83,7 +82,7 @@ export function ProductsPage() {
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <input 
             type="text" 
-            placeholder="Cari furniture, dekorasi, atau barang..." 
+            placeholder="Cari produk, kategori, atau barang..." 
             value={searchQuery}
             onChange={handleSearchChange}
             style={{
@@ -93,7 +92,9 @@ export function ProductsPage() {
               borderRadius: '12px',
               border: '1px solid #cbd5e1',
               fontSize: '0.95rem',
-              outline: 'none'
+              outline: 'none',
+              backgroundColor: '#ffffff',
+              color: '#0f172a'
             }}
           />
 
@@ -104,13 +105,15 @@ export function ProductsPage() {
               padding: '12px 16px',
               borderRadius: '12px',
               border: '1px solid #cbd5e1',
-              background: '#fff',
+              background: '#ffffff',
+              color: '#0f172a',
               fontSize: '0.95rem',
               outline: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontWeight: 500
             }}
           >
-            <option value="">Urutkan</option>
+            <option value="" style={{ color: '#64748b' }}>Urutkan Berdasarkan</option>
             <option value="price">Harga (Termurah)</option>
             <option value="rating">Rating Tertinggi</option>
           </select>
@@ -133,25 +136,25 @@ export function ProductsPage() {
           >
             Semua
           </button>
-          {categories.map((cat) => (
-            <button 
-              key={cat}
-              onClick={() => handleCategoryClick(cat)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: 'none',
-                background: selectedCategory === cat ? '#064e3b' : '#e2e8f0',
-                color: selectedCategory === cat ? '#fff' : '#334155',
-                fontWeight: 600,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                textTransform: 'capitalize'
-              }}
-            >
-              {cat}
-            </button>
-          ))}
+            {categories.map((cat) => (
+                <button 
+                key={cat} 
+                onClick={() => handleCategoryClick(cat)}
+                style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    background: selectedCategory === cat ? '#064e3b' : '#e2e8f0',
+                    color: selectedCategory === cat ? '#fff' : '#334155',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    textTransform: 'capitalize'
+                }}
+                >
+           {cat}
+         </button>
+       ))}
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import type { Product, ProductsResponse } from '../types/product';
+import type { Category, Product, ProductsResponse } from '../types/product';
 
 const BASE_URL = 'https://dummyjson.com/products';
 
@@ -23,7 +23,6 @@ export async function fetchProducts(searchQuery = '', limit = 10, skip = 0, sort
   return response.json();
 }
 
-// Mengambil daftar kategori produk
 export async function fetchCategories(): Promise<string[]> {
   const response = await fetch(`${BASE_URL}/categories`);
   if (!response.ok) {
