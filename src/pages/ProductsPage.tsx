@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../services/productService';
-import type { Category, Product } from '../types/product';
+import type { Product } from '../types/product';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner, ErrorMessage, EmptyState } from '../components/UIStates';
 
@@ -16,7 +16,7 @@ export function ProductsPage() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]); // 👈 Perhatikan tipe data Category[]
-  const [total, setTotal] = useState(0);
+  const [, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
