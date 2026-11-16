@@ -2,16 +2,17 @@ import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useFavorites } from "../hooks/useFavorites";
 import { useTheme } from "../hooks/useTheme";
+import { Home, ShoppingBag, Heart, Info } from "lucide-react"; // 👈 Import ikon dari lucide-react
 
 const LINKS = [
-  { to: "/", label: "Beranda", end: true },
-  { to: "/produk", label: "Produk", end: false },
-  { to: "/favorit", label: "Favorit", end: false },
-  { to: "/tentang", label: "Tentang", end: false },
+  { to: "/", label: "Beranda", end: true, icon: <Home size={18} /> },
+  { to: "/produk", label: "Produk", end: false, icon: <ShoppingBag size={18} /> },
+  { to: "/favorit", label: "Favorit", end: false, icon: <Heart size={18} /> },
+  { to: "/tentang", label: "Tentang", end: false, icon: <Info size={18} /> },
 ];
 
 export function MainLayout() {
-  const [menuOpen, setMenuOpen] = useState(false); // local state: menu mobile
+  const [menuOpen, setMenuOpen] = useState(false);
   const { ids } = useFavorites();
   const { theme, toggleTheme } = useTheme();
 
@@ -30,8 +31,10 @@ export function MainLayout() {
               end={l.end}
               className={({ isActive }) => (isActive ? "nav-link is-active" : "nav-link")}
               onClick={() => setMenuOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }} // 👈 Sedikit styling flex agar ikon sejajar rapi dengan teks
             >
-              {l.label}
+              {l.icon} {/* 👈 Render ikon di sini */}
+              <span>{l.label}</span>
               {l.to === "/favorit" && ids.length > 0 && (
                 <span className="count">{ids.length}</span>
               )}
@@ -63,7 +66,7 @@ export function MainLayout() {
         <Outlet />
       </main>
 
-      <footer className="footer">Faiz Muhammad Ilham • 1247050032 • IF A 24</footer>
+      <footer className="footer">Faiz Muhammad Ilham Hariry • 1247050032 • IF A 24 • Pengembangan Aplikasi Web </footer>
     </div>
   );
 }
