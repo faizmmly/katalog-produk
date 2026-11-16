@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useFavorites } from "../hooks/useFavorites";
 import { useTheme } from "../hooks/useTheme";
-import { Home, ShoppingBag, Heart, Info } from "lucide-react"; // 👈 Import ikon dari lucide-react
+import { Home, ShoppingBag, Heart, Info, Moon, Sun} from "lucide-react";
+import { ScrollToTop } from "../components/ScrollToTop";
+import { LoadingSpinner } from "../components/UIStates";
 
 const LINKS = [
   { to: "/", label: "Beranda", end: true, icon: <Home size={18} /> },
@@ -18,6 +20,7 @@ export function MainLayout() {
 
   return (
     <div className="app">
+      <ScrollToTop />
       <header className="topbar">
         <NavLink to="/" className="brand" onClick={() => setMenuOpen(false)}>
           TokoKita
@@ -31,12 +34,26 @@ export function MainLayout() {
               end={l.end}
               className={({ isActive }) => (isActive ? "nav-link is-active" : "nav-link")}
               onClick={() => setMenuOpen(false)}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }} // 👈 Sedikit styling flex agar ikon sejajar rapi dengan teks
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }} // 👈 Sedikit styling flex agar ikon sejajar rapi dengan teks
             >
-              {l.icon} {/* 👈 Render ikon di sini */}
+              {l.icon}
               <span>{l.label}</span>
+
               {l.to === "/favorit" && ids.length > 0 && (
-                <span className="count">{ids.length}</span>
+                <span 
+                  className="count"
+                  style={{ 
+                  marginLeft: '2px', 
+                  backgroundColor: '#ef4444', 
+                  color: 'white', 
+                  borderRadius: '9999px', 
+                  padding: '2px 6px', 
+                  fontSize: '11px', 
+                  fontWeight: 'bold' 
+                }}
+                  >
+                  {ids.length}
+                </span>
               )}
             </NavLink>
           ))}
@@ -48,7 +65,7 @@ export function MainLayout() {
           aria-label={theme === "dark" ? "Pakai tema terang" : "Pakai tema gelap"}
           onClick={toggleTheme}
         >
-          {theme === "dark" ? "☀️" : "🌙"}
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
         <button
@@ -63,7 +80,9 @@ export function MainLayout() {
       </header>
 
       <main className="page">
-        <Outlet />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="footer">Faiz Muhammad Ilham Hariry • 1247050032 • IF A 24 • Pengembangan Aplikasi Web </footer>
