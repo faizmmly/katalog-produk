@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import type { Product } from "../types/product";
 import { formatPrice } from "../utils/format";
 import { FavoriteButton } from "./FavoriteButton";
+import { ProductImage } from "./ProductImage";
 
 interface ProductCardProps {
   product: Product;
@@ -15,7 +16,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className="product-card">
       <Link to={`/produk/${product.id}`} className="product-link">
         <div className="product-thumb">
-          <img src={product.thumbnail} alt={product.title} loading="lazy" />
+          <ProductImage key={product.thumbnail} src={product.thumbnail} alt={product.title} />
           <span className="price-tag">{formatPrice(product.price)}</span>
         </div>
         <p className={`stock ${soldOut ? "is-out" : low ? "is-low" : ""}`}>

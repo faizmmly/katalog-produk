@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import type { Product, SortKey } from "../types/product";
 import { SORT_OPTIONS } from "../types/product";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
 
 const comparators: Record<SortKey, (a: Product, b: Product) => number> = {
   relevan: () => 0,

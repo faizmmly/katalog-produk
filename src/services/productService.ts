@@ -15,9 +15,18 @@ async function request<T>(path: string, signal?: AbortSignal): Promise<T> {
   return (await res.json()) as T;
 }
 
-export async function fetchAllProducts(signal?: AbortSignal): Promise<Product[]> {
-  const data = await request<ProductsResponse>(`/products?limit=0&select=${LIST_FIELDS}`, signal);
-  return data.products;
+let allProductsCache: Promise<Product[]> | null = null;
+
+export function fetchAllProducts(): Promise<Product[]> {
+  if (!allProductsCache) {
+    allProductsCache = request<ProductsResponse>(`/products?limit=0&select=${LIST_FIELDS}`)
+      .then((data) => data.products)
+      .catch((err: unknown) => {
+        allProductsCache = null; // gagal: izinkan coba lagi
+        throw err;
+      });
+  }
+  return allProductsCache;
 }
 
 export function fetchProduct(id: string, signal?: AbortSignal): Promise<ProductDetail> {
