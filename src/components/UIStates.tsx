@@ -1,3 +1,5 @@
+import { Search } from "lucide-react";
+
 export function LoadingSpinner() {
   return (
     <div className="state" role="status" aria-live="polite">
@@ -7,7 +9,7 @@ export function LoadingSpinner() {
   );
 }
 
-export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
+export function ProductGridSkeleton({ count = 12 }: { count?: number }) {
   return (
     <div className="grid" aria-hidden="true">
       {Array.from({ length: count }, (_, i) => (
@@ -51,7 +53,9 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="state">
-      <span aria-hidden="true">🔍</span>
+      <div className="state-icon" style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '8px' }}>
+        <Search size={36} strokeWidth={1.5} className="muted" />
+      </div>
       <h2>{title}</h2>
       <p className="muted">{message}</p>
       {actionLabel && onAction && (

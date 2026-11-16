@@ -8,10 +8,14 @@ import { Pagination } from "../components/Pagination";
 import { ProductCard } from "../components/ProductCard";
 import { SearchBar } from "../components/SearchBar";
 import { EmptyState, ErrorMessage, ProductGridSkeleton } from "../components/UIStates";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { useSearchShortcut } from "../hooks/useSearchShortcut";
 
 const NO_PRODUCTS: never[] = [];
 
 export function ProductsPage() {
+  useDocumentTitle("Produk");
+  useSearchShortcut("search");
   const { data, loading, error, refetch } = useFetch(fetchAllProducts);
   const list = useProductList(data ?? NO_PRODUCTS);
 
@@ -66,7 +70,14 @@ export function ProductsPage() {
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
-          <Pagination page={list.page} totalPages={list.totalPages} onChange={list.setPage} />
+          <Pagination 
+            page={list.page} 
+            totalPages={list.totalPages} 
+            onChange={(n) => {
+              list.setPage(n);
+              window.scrollTo({ top: 0, behavior: "smooth"});
+            }}
+            />
         </>
       )}
     </section>

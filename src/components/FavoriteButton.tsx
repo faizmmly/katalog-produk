@@ -1,3 +1,4 @@
+import { Heart } from "lucide-react";
 import { useFavorites } from "../hooks/useFavorites";
 
 interface FavoriteButtonProps {
@@ -17,8 +18,16 @@ export function FavoriteButton({ productId, title, className = "" }: FavoriteBut
       aria-pressed={active}
       aria-label={active ? `Hapus ${title} dari favorit` : `Tambahkan ${title} ke favorit`}
       onClick={() => toggle(productId)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
-      {active ? "♥" : "♡"}
+      <Heart
+      size={18} 
+      fill={active ? "currentColor" : "none"}
+      />
     </button>
   );
 }
