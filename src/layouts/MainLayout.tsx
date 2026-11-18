@@ -1,21 +1,26 @@
 import { Suspense, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useFavorites } from "../hooks/useFavorites";
+import { useCart } from "../hooks/useCart";
 import { useTheme } from "../hooks/useTheme";
-import { Home, ShoppingBag, Heart, Info, Moon, Sun} from "lucide-react";
+import { Home, ShoppingBag, Heart, ShoppingCart, Info, Moon, Sun } from "lucide-react";
 import { ScrollToTop } from "../components/ScrollToTop";
 import { LoadingSpinner } from "../components/UIStates";
+import { BackToTop } from "../components/BackToTop";
+import { ToastContainer } from "../components/ToastContainer";
 
 const LINKS = [
   { to: "/", label: "Beranda", end: true, icon: <Home size={18} /> },
   { to: "/produk", label: "Produk", end: false, icon: <ShoppingBag size={18} /> },
   { to: "/favorit", label: "Favorit", end: false, icon: <Heart size={18} /> },
+  { to: "/keranjang", label: "Keranjang", end: false, icon: <ShoppingCart size={18} /> },
   { to: "/tentang", label: "Tentang", end: false, icon: <Info size={18} /> },
 ];
 
 export function MainLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { ids } = useFavorites();
+  const { totalItems } = useCart();
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -34,25 +39,42 @@ export function MainLayout() {
               end={l.end}
               className={({ isActive }) => (isActive ? "nav-link is-active" : "nav-link")}
               onClick={() => setMenuOpen(false)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }} // 👈 Sedikit styling flex agar ikon sejajar rapi dengan teks
+              style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
             >
               {l.icon}
               <span>{l.label}</span>
 
               {l.to === "/favorit" && ids.length > 0 && (
-                <span 
+                <span
                   className="count"
-                  style={{ 
-                  marginLeft: '2px', 
-                  backgroundColor: '#ef4444', 
-                  color: 'white', 
-                  borderRadius: '9999px', 
-                  padding: '2px 6px', 
-                  fontSize: '11px', 
-                  fontWeight: 'bold' 
-                }}
-                  >
+                  style={{
+                    marginLeft: "2px",
+                    backgroundColor: "#ef4444",
+                    color: "white",
+                    borderRadius: "9999px",
+                    padding: "2px 6px",
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                  }}
+                >
                   {ids.length}
+                </span>
+              )}
+
+              {l.to === "/keranjang" && totalItems > 0 && (
+                <span
+                  className="count"
+                  style={{
+                    marginLeft: "2px",
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    borderRadius: "9999px",
+                    padding: "2px 6px",
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {totalItems}
                 </span>
               )}
             </NavLink>
@@ -85,7 +107,12 @@ export function MainLayout() {
         </Suspense>
       </main>
 
-      <footer className="footer">Faiz Muhammad Ilham Hariry • 1247050032 • IF A 24 • Pengembangan Aplikasi Web </footer>
+      <footer className="footer">
+        Faiz Muhammad Ilham Hariry • 1247050032 • IF A 24 • Pengembangan Aplikasi Web
+      </footer>
+
+      <BackToTop />
+      <ToastContainer />
     </div>
   );
 }

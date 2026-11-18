@@ -5,7 +5,8 @@ import { ThemeContext } from "./themeContext";
 import type { Theme } from "./themeContext";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useLocalStorage<Theme>("katalog-theme", "light");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const [theme, setTheme] = useLocalStorage<Theme>("katalog-theme", prefersDark ? "dark" : "light");
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
