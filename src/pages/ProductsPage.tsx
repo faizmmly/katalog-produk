@@ -10,6 +10,7 @@ import { SearchBar } from "../components/SearchBar";
 import { EmptyState, ErrorMessage, ProductGridSkeleton } from "../components/UIStates";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useSearchShortcut } from "../hooks/useSearchShortcut";
+import { SearchX } from "lucide-react";
 
 const NO_PRODUCTS: never[] = [];
 
@@ -56,6 +57,7 @@ export function ProductsPage() {
 
       {!loading && !error && list.items.length === 0 && (
         <EmptyState
+          icon={<SearchX size={36} />}
           title="Produk tidak ditemukan"
           message="Coba kata kunci lain atau hapus filter."
           actionLabel="Reset filter"

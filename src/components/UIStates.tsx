@@ -1,4 +1,7 @@
 import { Search } from "lucide-react";
+import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { SearchX } from "lucide-react";
 
 export function LoadingSpinner() {
   return (
@@ -39,27 +42,32 @@ export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
 }
 
 interface EmptyStateProps {
+  icon?: ReactNode;
   title?: string;
   message?: string;
   actionLabel?: string;
-  onAction?: () => void;
+  to?: string; // tombol berupa tautan ke halaman lain
+  onAction?: () => void; // tombol berupa aksi
 }
 
 export function EmptyState({
+  icon = <SearchX size={36} />,
   title = "Tidak ada hasil",
   message = "Coba ubah kata kunci atau filter.",
   actionLabel,
+  to,
   onAction,
 }: EmptyStateProps) {
   return (
     <div className="state">
-      <div className="state-icon" style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: '8px' }}>
-        <Search size={36} strokeWidth={1.5} className="muted" />
-      </div>
+      <span className="state-icon" aria-hidden="true">{icon}</span>
       <h2>{title}</h2>
       <p className="muted">{message}</p>
-      {actionLabel && onAction && (
-        <button type="button" className="btn btn-ghost" onClick={onAction}>
+      {actionLabel && to && (
+        <Link to={to} className="btn-link">{actionLabel}</Link>
+      )}
+      {actionLabel && !to && onAction && (
+        <button type="button" className="btn btn-primary" onClick={onAction}>
           {actionLabel}
         </button>
       )}

@@ -67,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
           borderRadius: "8px",
           cursor: soldOut ? "not-allowed" : "pointer",
           opacity: soldOut ? 0.5 : 1,
-          backgroundColor: added ? "#16a34a" : undefined,
+          backgroundColor: added ? "var(--success)" : undefined,
           transition: "background-color 0.2s ease",
         }}
       >

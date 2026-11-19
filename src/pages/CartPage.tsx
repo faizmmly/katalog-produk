@@ -1,203 +1,364 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { CheckCircle2, CreditCard, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "../hooks/useCart";
-import { formatPrice } from "../utils/format";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { EmptyState } from "../components/UIStates";
+import { formatPrice } from "../utils/format";
+import { showToast } from "../utils/toast";
+
+interface OrderReceipt {
+  invoice: string;
+  name: string;
+  address: string;
+  payment: string;
+  totalItems: number;
+  totalPrice: number;
+}
 
 export function CartPage() {
-  useDocumentTitle("Keranjang Belanja");
+  useDocumentTitle("Keranjang");
+  const navigate = useNavigate();
   const { items, updateQuantity, removeItem, clearCart, totalItems, totalPrice } = useCart();
-  const [checkedOut, setCheckedOut] = useState(false);
 
-  const handleCheckout = () => {
-    clearCart();
-    setCheckedOut(true);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [payment, setPayment] = useState("QRIS");
+  const [receipt, setReceipt] = useState<OrderReceipt | null>(null);
+
+  const handleContinueShopping = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/produk");
+    }
   };
 
-  if (checkedOut) {
+  const handleConfirmOrder = (e: FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !address.trim()) {
+      showToast("Lengkapi nama dan alamat pengiriman dulu ya", "error");
+      return;
+    }
+
+    const orderSummary: OrderReceipt = {
+      invoice: `INV-${Math.floor(100000 + Math.random() * 900000)}`,
+      name: name.trim(),
+      address: address.trim(),
+      payment,
+      totalItems,
+      totalPrice,
+    };
+
+    clearCart();
+    setIsCheckoutOpen(false);
+    setReceipt(orderSummary);
+    setName("");
+    setAddress("");
+    showToast("Pesanan berhasil dibuat!", "success");
+  };
+
+  // Tampilan akhir setelah checkout berhasil (Struk Konfirmasi)
+  if (receipt) {
     return (
-      <div style={{ textAlign: "center", padding: "48px 16px" }}>
-        <CheckCircle2 size={56} style={{ color: "#22c55e", margin: "0 auto 16px" }} />
-        <h1>Pesanan Berhasil Dibuat!</h1>
-        <p className="muted" style={{ maxWidth: "420px", margin: "8px auto 24px" }}>
-          Terima kasih telah berbelanja di TokoKita. Pesanan Anda sedang diproses.
-        </p>
-        <Link to="/produk" className="btn btn-primary">
-          Lanjut Belanja
-        </Link>
-      </div>
+      <section style={{ maxWidth: "520px", margin: "16px auto" }}>
+        <div
+          style={{
+            background: "var(--panel)",
+            border: "1px solid var(--line)",
+            borderRadius: "var(--radius)",
+            padding: "28px 24px",
+            display: "grid",
+            gap: "16px",
+            textAlign: "center",
+            boxShadow: "var(--shadow)",
+          }}
+        >
+          <div
+            style={{
+              width: "68px",
+              height: "68px",
+              margin: "0 auto",
+              borderRadius: "50%",
+              background: "rgba(5, 150, 105, 0.14)",
+              color: "var(--success)",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <CheckCircle2 size={38} />
+          </div>
+
+          <div>
+            <span className="small muted">No. Invoice: <strong>{receipt.invoice}</strong></span>
+            <h1 style={{ marginTop: "4px" }}>Pesanan Berhasil!</h1>
+            <p className="muted" style={{ marginTop: "6px" }}>
+              Terima kasih, <strong>{receipt.name}</strong>. Pesananmu sedang diproses untuk dikirim.
+            </p>
+          </div>
+
+          <div
+            style={{
+              textAlign: "left",
+              background: "var(--bg)",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              display: "grid",
+              gap: "8px",
+              fontSize: "0.9rem",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="muted">Metode Pembayaran</span>
+              <strong>{receipt.payment}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="muted">Jumlah Barang</span>
+              <strong>{receipt.totalItems} item</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="muted">Total Dibayar</span>
+              <strong style={{ color: "var(--primary-text)" }}>{formatPrice(receipt.totalPrice)}</strong>
+            </div>
+            <div style={{ borderTop: "1px solid var(--line)", paddingTop: "8px" }}>
+              <span className="muted small">Alamat Pengiriman:</span>
+              <p style={{ marginTop: "2px" }}>{receipt.address}</p>
+            </div>
+          </div>
+
+          <Link to="/produk" className="btn-link" style={{ marginTop: "4px" }} onClick={() => setReceipt(null)}>
+            Kembali Belanja
+          </Link>
+        </div>
+      </section>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div style={{ textAlign: "center", padding: "48px 16px" }}>
-        <ShoppingBag size={48} className="muted" style={{ margin: "0 auto 16px" }} />
-        <h2>Keranjang Masih Kosong</h2>
-        <p className="muted" style={{ margin: "8px 0 24px" }}>
-          Yuk, temukan produk menarik dan tambahkan ke keranjangmu!
-        </p>
-        <Link to="/produk" className="btn btn-primary">
-          Jelajahi Produk
-        </Link>
-      </div>
+      <section>
+        <div className="page-head"><h1>Keranjang</h1></div>
+        <EmptyState
+          icon={<ShoppingBag size={36} />}
+          title="Keranjang masih kosong"
+          message="Temukan produk menarik dan tambahkan ke keranjangmu."
+          actionLabel="Jelajahi produk"
+          to="/produk"
+        />
+      </section>
     );
   }
 
   return (
-    <div>
-      <Link to="/produk" className="back" style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-        <ArrowLeft size={18} />
-        <span>Lanjut belanja</span>
-      </Link>
-
-      <div className="page-head" style={{ marginBottom: "24px" }}>
-        <h1>Keranjang Belanja ({totalItems} item)</h1>
+    <section>
+      <div className="page-head">
+        <h1>Keranjang</h1>
+        <button type="button" className="btn btn-ghost" onClick={clearCart}>Kosongkan</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px" }}>
-        {/* Daftar Produk di Keranjang */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {items.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                padding: "16px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.03)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                flexWrap: "wrap",
-              }}
-            >
-              <img
-                src={item.thumbnail}
-                alt={item.title}
-                style={{
-                  width: "72px",
-                  height: "72px",
-                  objectFit: "contain",
-                  background: "#f1f5f9",
-                  borderRadius: "8px",
-                  padding: "4px",
-                }}
-              />
-
-              <div style={{ flex: 1, minWidth: "160px" }}>
-                <Link to={`/produk/${item.id}`} style={{ fontWeight: "bold", fontSize: "1.05rem" }}>
-                  {item.title}
+      <div className="cart-layout">
+        <ul className="cart-list">
+          {items.map((item) => {
+            const atMax = item.quantity >= item.stock;
+            return (
+              <li key={item.id} className="cart-item">
+                <Link to={`/produk/${item.id}`} className="cart-thumb">
+                  <img src={item.thumbnail} alt={item.title} loading="lazy" />
                 </Link>
-                <p className="detail-price" style={{ fontSize: "1rem", margin: "4px 0" }}>
-                  {formatPrice(item.price)}
-                </p>
-                <span className="muted" style={{ fontSize: "0.8rem" }}>
-                  Stok tersedia: {item.stock}
-                </span>
-              </div>
 
-              {/* Kontrol Jumlah (- / +) */}
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <button
-                  type="button"
-                  onClick={() => updateQuantity(item.id, -1)}
-                  aria-label="Kurangi jumlah"
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    background: "transparent",
-                    color: "inherit",
-                    display: "grid",
-                    placeItems: "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <Minus size={14} />
-                </button>
+                <div className="cart-info">
+                  <Link to={`/produk/${item.id}`} className="cart-title">{item.title}</Link>
+                  <p className="muted">{formatPrice(item.price)}</p>
+                  <div className="qty" role="group" aria-label={`Jumlah ${item.title}`}>
+                    <button type="button" aria-label="Kurangi jumlah" onClick={() => updateQuantity(item.id, -1)}>
+                      <Minus size={16} />
+                    </button>
+                    <span aria-live="polite">{item.quantity}</span>
+                    <button type="button" aria-label="Tambah jumlah" disabled={atMax} onClick={() => updateQuantity(item.id, 1)}>
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  {atMax && <p className="stock is-low">Stok maksimum tercapai</p>}
+                </div>
 
-                <span style={{ fontWeight: "bold", minWidth: "24px", textAlign: "center" }}>
-                  {item.quantity}
-                </span>
+                <div className="cart-side">
+                  <strong>{formatPrice(item.price * item.quantity)}</strong>
+                  <button type="button" className="icon-link" aria-label={`Hapus ${item.title}`} onClick={() => removeItem(item.id)}>
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
 
-                <button
-                  type="button"
-                  onClick={() => updateQuantity(item.id, 1)}
-                  disabled={item.quantity >= item.stock}
-                  aria-label="Tambah jumlah"
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    background: "transparent",
-                    color: "inherit",
-                    display: "grid",
-                    placeItems: "center",
-                    cursor: item.quantity >= item.stock ? "not-allowed" : "pointer",
-                    opacity: item.quantity >= item.stock ? 0.4 : 1,
-                  }}
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-
-              {/* Subtotal & Hapus */}
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginLeft: "auto" }}>
-                <strong style={{ fontSize: "1.05rem" }}>
-                  {formatPrice(item.price * item.quantity)}
-                </strong>
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.id)}
-                  aria-label="Hapus item"
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "#ef4444",
-                    cursor: "pointer",
-                    padding: "4px",
-                  }}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Ringkasan Belanja */}
-        <div
-          style={{
-            padding: "20px",
-            borderRadius: "12px",
-            background: "rgba(255, 255, 255, 0.04)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span className="muted">Total Pembayaran ({totalItems} barang)</span>
-            <strong style={{ fontSize: "1.4rem", color: "#3b82f6" }}>
-              {formatPrice(totalPrice)}
-            </strong>
-          </div>
-
+        <aside className="summary" aria-label="Ringkasan belanja">
+          <h2>Ringkasan</h2>
+          <dl>
+            <div><dt>Jumlah barang</dt><dd>{totalItems}</dd></div>
+            <div className="total"><dt>Total</dt><dd>{formatPrice(totalPrice)}</dd></div>
+          </dl>
           <button
             type="button"
-            onClick={handleCheckout}
             className="btn btn-primary"
-            style={{ width: "100%", padding: "12px", fontWeight: "bold", marginTop: "8px", cursor: "pointer" }}
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+            onClick={() => setIsCheckoutOpen(true)}
           >
-            Checkout Sekarang
+            <CreditCard size={18} />
+            <span>Checkout Sekarang</span>
           </button>
-        </div>
+          <button type="button" className="btn btn-ghost" onClick={handleContinueShopping}>
+            Lanjut belanja
+          </button>
+        </aside>
       </div>
-    </div>
+
+      {/* Modal Form Checkout */}
+      {isCheckoutOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="checkout-title"
+          onClick={() => setIsCheckoutOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100,
+            background: "rgba(11, 17, 32, 0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "12px",
+            overflowY: "auto",
+          }}
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={handleConfirmOrder}
+            style={{
+              width: "100%",
+              maxWidth: "440px",
+              maxHeight: "calc(100dvh - 24px)",
+              overflowY: "auto",
+              background: "var(--panel)",
+              border: "1px solid var(--line)",
+              borderRadius: "var(--radius)",
+              padding: "clamp(16px, 4vw, 24px)",
+              display: "grid",
+              gap: "12px",
+              boxShadow: "var(--shadow)",
+              margin: "auto",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+              <h2 id="checkout-title" style={{ fontSize: "1.15rem" }}>Checkout Pesanan</h2>
+              <button
+                type="button"
+                className="icon-link"
+                aria-label="Tutup modal"
+                onClick={() => setIsCheckoutOpen(false)}
+                style={{ width: "36px", height: "36px", flexShrink: 0 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="field">
+              <label htmlFor="checkout-name">Nama Penerima</label>
+              <input
+                id="checkout-name"
+                type="text"
+                placeholder="Contoh: Faiz"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="checkout-address">Alamat Pengiriman</label>
+              <textarea
+                id="checkout-address"
+                rows={2}
+                placeholder="Masukkan alamat lengkap pengiriman..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="field">
+              <span className="label">Metode Pembayaran</span>
+              <div style={{ display: "grid", gap: "8px" }}>
+                {[
+                  { id: "QRIS", label: "QRIS (Instan)" },
+                  { id: "Transfer Bank", label: "Transfer Bank (BCA / Mandiri)" },
+                  { id: "COD", label: "COD (Bayar di Tempat)" },
+                ].map((opt) => {
+                  const active = payment === opt.label;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setPayment(opt.label)}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "10px 14px",
+                        borderRadius: "12px",
+                        border: active ? "1.5px solid var(--primary)" : "1.5px solid var(--line)",
+                        background: active ? "var(--primary-soft)" : "var(--panel)",
+                        color: active ? "var(--primary-text)" : "var(--text)",
+                        font: "inherit",
+                        fontSize: "0.9rem",
+                        fontWeight: active ? 600 : 500,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>{opt.label}</span>
+                      <span
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          borderRadius: "50%",
+                          border: active ? "5px solid var(--primary)" : "2px solid var(--muted)",
+                          flexShrink: 0,
+                        }}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "4px 12px",
+                paddingTop: "10px",
+                borderTop: "1px solid var(--line)",
+              }}
+            >
+              <span className="muted small">Total ({totalItems} item)</span>
+              <strong style={{ fontSize: "1.15rem", color: "var(--primary-text)" }}>
+                {formatPrice(totalPrice)}
+              </strong>
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "2px" }}>
+              Konfirmasi & Bayar
+            </button>
+          </form>
+        </div>
+      )}
+    </section>
   );
 }
